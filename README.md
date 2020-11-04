@@ -10,7 +10,7 @@ Slides will be available from this link: **TBC**.
 ## Exercises
 
 This repository contains files and dataset for exercises for the masterclass workshop taking place
-29-30 October, 2020, from 15:30-18:00 Canberra time.
+5-6 November, 2020, from 15:30-18:00 Canberra time.
 
 ## How to Use
 
