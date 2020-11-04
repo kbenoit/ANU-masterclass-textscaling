@@ -1,0 +1,124 @@
+---
+title: "Scaling Models for Textual Data"
+author: "Ken Benoit"
+date: "ANU 5-6 November 2020"  
+output:
+  xaringan::moon_reader:
+    css: [default, default-fonts, css/styles.css]
+    lib_dir: libs
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+## Scaling: unsupervised and supervised
+
+Supervised
+-  Wordscores
+-  "class affinity scaling"
+
+Unsupervised
+-  Wordfish
+-  Correspondence Analysis
+
+---
+
+## Supervised scaling
+
+```{r echo = FALSE}
+suppressMessages(library("quanteda", quietly = TRUE, warn.conflicts = FALSE))
+library("quanteda.textmodels")
+```
+
+```{r}
+tmod <- textmodel_wordscores(data_dfm_lbgexample, y = c(seq(-1.5, 1.5, .75), NA))
+summary(tmod)
+```
+
+---
+
+## Extracting useful information
+
+```{r}
+coef(tmod)
+```
+
+---
+
+## Predictions
+
+```{r}
+predict(tmod)
+predict(tmod, newdata = data_dfm_lbgexample["V1", ])
+predict(tmod, rescaling = "lbg")
+```
+
+---
+
+## Predictions with confidence intervals
+
+```{r}
+predict(tmod, se.fit = TRUE, interval = "confidence", rescaling = "mv")
+```
+
+---
+
+## Plotting a textmodel
+
+```{r}
+dfmat <- dfm(data_corpus_irishbudget2010)
+refscores <- c(rep(NA, 4), 1, -1, rep(NA, 8))
+tmod1 <- textmodel_wordscores(dfmat, y = refscores, smooth = 1)
+```
+
+---
+
+## Plotting a textmodel
+
+```{r}
+# plot estimated document positions
+textplot_scale1d(predict(tmod1, se.fit = TRUE), 
+                 groups = dfmat$party)
+```
+
+---
+
+## Unsupervised method: Wordfish
+
+-  Does not require reference texts
+-  Estimates a latent position for each text, represented as $$\theta$$
+-  Estimates word weights and word "coefficients"
+-  Includes confidence intervals
+-  No "predict" step
+
+---
+
+## Fitting the Wordfish model
+
+```{r}
+dfmat <- dfm(data_corpus_irishbudget2010)
+tmod2 <- textmodel_wordfish(dfmat, dir = c(6,5))
+summary(tmod2)
+```
+
+---
+
+## Plotting the Wordfish model
+
+```{r}
+textplot_scale1d(tmod2, groups = dfmat$party)
+```
+
+---
+
+## Other textmodel types
+
+-  `textmodel_affinity`: Class affinity maximum likelihood text scaling model
+-  `textmodel_ca`: Correspondence analysis of a document-feature matrix
+-  `textmodel_lsa`: Latent Semantic Analysis

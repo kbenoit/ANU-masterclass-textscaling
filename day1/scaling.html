@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Scaling Models for Textual Data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Ken Benoit" />
+    <script src="libs/header-attrs-2.3/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Scaling Models for Textual Data
+### Ken Benoit
+### ANU 5-6 November 2020
+
+---
+
+
+
+## Scaling: unsupervised and supervised
+
+Supervised
+-  Wordscores
+-  "class affinity scaling"
+
+Unsupervised
+-  Wordfish
+-  Correspondence Analysis
+
+---
+
+## Supervised scaling
+
+
+```
+## 
+## Attaching package: 'quanteda.textmodels'
+```
+
+```
+## The following object is masked from 'package:quanteda':
+## 
+##     data_dfm_lbgexample
+```
+
+
+```r
+tmod &lt;- textmodel_wordscores(data_dfm_lbgexample, y = c(seq(-1.5, 1.5, .75), NA))
+summary(tmod)
+```
+
+```
+## 
+## Call:
+## textmodel_wordscores.dfm(x = data_dfm_lbgexample, y = c(seq(-1.5, 
+##     1.5, 0.75), NA))
+## 
+## Reference Document Statistics:
+##    score total min max  mean median
+## R1 -1.50  1000   0 158 27.03      0
+## R2 -0.75  1000   0 158 27.03      0
+## R3  0.00  1000   0 158 27.03      0
+## R4  0.75  1000   0 158 27.03      0
+## R5  1.50  1000   0 158 27.03      0
+## V1    NA  1000   0 158 27.03      0
+## 
+## Wordscores:
+## (showing first 30 elements)
+##       A       B       C       D       E       F       G       H       I       J 
+## -1.5000 -1.5000 -1.5000 -1.5000 -1.5000 -1.4812 -1.4809 -1.4519 -1.4083 -1.3233 
+##       K       L       M       N       O       P       Q       R       S       T 
+## -1.1846 -1.0370 -0.8806 -0.7500 -0.6194 -0.4508 -0.2992 -0.1306  0.0000  0.1306 
+##       U       V       W       X       Y       Z      ZA      ZB      ZC      ZD 
+##  0.2992  0.4508  0.6194  0.7500  0.8806  1.0370  1.1846  1.3233  1.4083  1.4519
+```
+
+---
+
+## Extracting useful information
+
+
+```r
+coef(tmod)
+```
+
+```
+##          A          B          C          D          E          F          G 
+## -1.5000000 -1.5000000 -1.5000000 -1.5000000 -1.5000000 -1.4812500 -1.4809322 
+##          H          I          J          K          L          M          N 
+## -1.4519231 -1.4083333 -1.3232984 -1.1846154 -1.0369898 -0.8805970 -0.7500000 
+##          O          P          Q          R          S          T          U 
+## -0.6194030 -0.4507576 -0.2992424 -0.1305970  0.0000000  0.1305970  0.2992424 
+##          V          W          X          Y          Z         ZA         ZB 
+##  0.4507576  0.6194030  0.7500000  0.8805970  1.0369898  1.1846154  1.3232984 
+##         ZC         ZD         ZE         ZF         ZG         ZH         ZI 
+##  1.4083333  1.4519231  1.4809322  1.4812500  1.5000000  1.5000000  1.5000000 
+##         ZJ         ZK 
+##  1.5000000  1.5000000
+```
+
+---
+
+## Predictions
+
+
+```r
+predict(tmod)
+```
+
+```
+##            R1            R2            R3            R4            R5 
+## -1.317931e+00 -7.395598e-01 -8.673617e-18  7.395598e-01  1.317931e+00 
+##            V1 
+## -4.480591e-01
+```
+
+```r
+predict(tmod, newdata = data_dfm_lbgexample["V1", ])
+```
+
+```
+##         V1 
+## -0.4480591
+```
+
+```r
+predict(tmod, rescaling = "lbg")
+```
+
+```
+##          R1          R2          R3          R4          R5          V1 
+## -1.58967683 -0.88488724  0.01632248  0.91753220  1.62232179 -0.52967149
+```
+
+---
+
+## Predictions with confidence intervals
+
+
+```r
+predict(tmod, se.fit = TRUE, interval = "confidence", rescaling = "mv")
+```
+
+```
+## Warning in predict.textmodel_wordscores(tmod, se.fit = TRUE, interval =
+## "confidence", : More than two reference scores found with MV rescaling; using
+## only min, max values.
+```
+
+```
+## $fit
+##           fit         lwr         upr
+## R1 -1.5000000 -1.51494501 -1.48505499
+## R2 -0.8417280 -0.86723325 -0.81622274
+## R3  0.0000000 -0.02678045  0.02678045
+## R4  0.8417280  0.81622274  0.86723325
+## R5  1.5000000  1.48505499  1.51494501
+## V1 -0.5099572 -0.53649769 -0.48341678
+## 
+## $se.fit
+##          R1          R2          R3          R4          R5          V1 
+## 0.007625147 0.013013126 0.013663743 0.013013126 0.007625147 0.013541297
+```
+
+---
+
+## Plotting a textmodel
+
+
+```r
+dfmat &lt;- dfm(data_corpus_irishbudget2010)
+refscores &lt;- c(rep(NA, 4), 1, -1, rep(NA, 8))
+tmod1 &lt;- textmodel_wordscores(dfmat, y = refscores, smooth = 1)
+```
+
+---
+
+## Plotting a textmodel
+
+
+```r
+# plot estimated document positions
+textplot_scale1d(predict(tmod1, se.fit = TRUE), 
+                 groups = dfmat$party)
+```
+
+![](scaling_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+
+## Unsupervised method: Wordfish
+
+-  Does not require reference texts
+-  Estimates a latent position for each text, represented as `$$\theta$$`
+-  Estimates word weights and word "coefficients"
+-  Includes confidence intervals
+-  No "predict" step
+
+---
+
+## Fitting the Wordfish model
+
+
+```r
+dfmat &lt;- dfm(data_corpus_irishbudget2010)
+tmod2 &lt;- textmodel_wordfish(dfmat, dir = c(6,5))
+summary(tmod2)
+```
+
+```
+## 
+## Call:
+## textmodel_wordfish.dfm(x = dfmat, dir = c(6, 5))
+## 
+## Estimated Document Positions:
+##                             theta      se
+## Lenihan, Brian (FF)        1.8170 0.02011
+## Bruton, Richard (FG)      -0.5989 0.02775
+## Burton, Joan (LAB)        -1.1002 0.01531
+## Morgan, Arthur (SF)       -0.1287 0.02801
+## Cowen, Brian (FF)          1.7713 0.02343
+## Kenny, Enda (FG)          -0.7152 0.02617
+## ODonnell, Kieran (FG)     -0.4914 0.04135
+## Gilmore, Eamon (LAB)      -0.5643 0.02930
+## Higgins, Michael (LAB)    -0.9695 0.03846
+## Quinn, Ruairi (LAB)       -0.9563 0.03894
+## Gormley, John (Green)      1.1868 0.07281
+## Ryan, Eamon (Green)        0.1858 0.06309
+## Cuffe, Ciaran (Green)      0.7550 0.07289
+## OCaolain, Caoimhghin (SF) -0.1913 0.03625
+## 
+## Estimated Feature Scores:
+##         when      i presented    the supplementary  budget     to   this  house
+## beta -0.1493 0.3448    0.3542 0.2101         1.077 0.05192 0.3252 0.2617 0.1539
+## psi   1.6204 2.7210   -1.7889 5.3302        -1.119 2.70856 4.5186 3.4604 1.0390
+##        last   april      ,    said     we  could   work    our    way through
+## beta 0.2438 -0.1484 0.3011 -0.7755 0.4367 -0.588 0.5402 0.7032 0.2904  0.6209
+## psi  0.9874 -0.5767 4.4710 -0.4285 3.5109  1.088 1.1144 2.5291 1.4191  1.1648
+##       period     of severe economic distress     .  today    can  report
+## beta  0.5154 0.2945  1.243   0.4348    1.823 0.228 0.1305 0.3193  0.6498
+## psi  -0.1779 4.4653 -2.017   1.5737   -4.485 4.911 0.8371 1.5646 -0.2557
+##         that notwithstanding
+## beta 0.04129           1.823
+## psi  3.83695          -4.485
+```
+
+---
+
+## Plotting the Wordfish model
+
+
+```r
+textplot_scale1d(tmod2, groups = dfmat$party)
+```
+
+![](scaling_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+
+---
+
+## Other textmodel types
+
+-  `textmodel_affinity`: Class affinity maximum likelihood text scaling model
+-  `textmodel_ca`: Correspondence analysis of a document-feature matrix
+-  `textmodel_lsa`: Latent Semantic Analysis
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
