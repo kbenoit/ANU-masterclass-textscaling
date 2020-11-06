@@ -207,8 +207,8 @@ textplot_scale1d(predict(tmod1, se.fit = TRUE),
 
 ```r
 dfmat &lt;- dfm(data_corpus_irishbudget2010)
-tmod2 &lt;- textmodel_wordfish(dfmat, dir = c(6,5))
-summary(tmod2)
+tmod_wf &lt;- textmodel_wordfish(dfmat, dir = c(6, 5))
+summary(tmod_wf)
 ```
 
 ```
@@ -254,7 +254,7 @@ summary(tmod2)
 
 
 ```r
-textplot_scale1d(tmod2, groups = dfmat$party)
+textplot_scale1d(tmod_wf, groups = dfmat$party)
 ```
 
 ![](scaling_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
@@ -266,6 +266,61 @@ textplot_scale1d(tmod2, groups = dfmat$party)
 -  `textmodel_affinity`: Class affinity maximum likelihood text scaling model
 -  `textmodel_ca`: Correspondence analysis of a document-feature matrix
 -  `textmodel_lsa`: Latent Semantic Analysis
+
+---
+
+
+```r
+tmod_ca &lt;- textmodel_ca(dfmat)
+
+# plot comparison of two document scores
+plot(coef(tmod_wf, "doc")[, "theta"], coef(tmod_ca)$coef_document,
+     xlab = "Wordfish document positions",
+     ylab = "CA document positions")
+```
+
+![](scaling_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+---
+
+
+```r
+# plot comparison of two word positions
+plot(coef(tmod_wf, "features")[, "beta"], coef(tmod_ca)$coef_feature,
+     xlab = "Wordfish feature weights",
+     ylab = "CA feature weights")
+```
+
+![](scaling_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+---
+
+Scaling plot of document positions for Wordfish:
+
+```r
+textplot_scale1d(tmod_wf, groups = dfmat$party)
+```
+
+![](scaling_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+---
+
+Compare with correspondence analysis:
+
+```r
+textplot_scale1d(tmod_ca, groups = dfmat$party)
+```
+
+![](scaling_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+---
+We can also plot the scaling figures for features.
+
+```r
+textplot_scale1d(tmod_wf, margin = "features",
+                 highlighted = c("gang", "bailout", "medicine", 
+                                 "stabilise", "innovation", "future"))
+```
+
+![](scaling_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
