@@ -5,12 +5,32 @@ School of Politics and International Relations
 
 ## Slides
 
-Slides will be available from this link: **TBC**.
+Slides are in the day1 and day2 folders.
 
-## Exercises
+## Examples
 
-This repository contains files and dataset for exercises for the masterclass workshop taking place
+This repository contains slides for the examples as well, for the masterclass workshop taking place
 5-6 November, 2020, from 15:30-18:00 Canberra time.
+
+## Readings
+
+Laver, M., Benoit, K.R., & Garry, J. (2003).  [Estimating Policy Positions from
+Political Text using Words as
+Data](https://kenbenoit.net/pdfs/WORDSCORESAPSR.pdf). *American Political
+Science Review*, 97(2), 311--331.
+
+Lowe, W. & Benoit, K.R. (2013). [Validating Estimates of Latent Traits from
+Textual Data Using Human Judgment as a
+Benchmark](http://doi.org/10.1093/pan/mpt002). *Political Analysis*, 21(3),
+298--313.
+
+Martin, L.W. & Vanberg, G. (2007). [A Robust Transformation Procedure for
+Interpreting Political Text](https://doi.org/10.1093/pan/mpm010). *Political
+Analysis* 16(1), 93--100.
+
+Slapin, J. & Proksch, S.O. (2008). [A Scaling Model for Estimating Time-Series
+Party Positions from Texts](https://doi.org/10.1111/j.1540-5907.2008.00338.x).
+*American Journal of Political Science*, 52(3), 705--772.
 
 ## How to Use
 
